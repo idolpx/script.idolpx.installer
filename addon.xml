@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<addon id="script.idolpx.installer" name="idolpx Installer" version="20180109_01" provider-name="idolpx">
+<addon id="script.idolpx.installer" name="idolpx Installer" version="20181225_01" provider-name="idolpx">
 	<requires>
 		<import addon="xbmc.python" version="2.14.0"/>
 	</requires>
