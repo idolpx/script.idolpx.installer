@@ -5,7 +5,7 @@ The main functionality is working.  There are some features that still need to b
 
 ## Kodi Addon Setup
 
-1. Edit the "update_url" setting in "resources/settings.xml" to match your domain and that you upload the server scripts to
+1. Edit the "update_url" setting in "resources/settings.xml" to match your domain that you upload the server scripts to
 2. Zip addon (Make sure the top level folder "script.idolpx.installer" is in the zip and the addon files are inside it.)
 3. Install addon in Kodi with "Install from zip file" option
 4. Configure all of your other addons the way you want them
