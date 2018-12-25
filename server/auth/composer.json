@@ -1,0 +1,9 @@
+{
+    "name": "administrator/kodi",
+    "type": "project",
+    "require": {
+        "psr/log": "^1.0",
+        "katzgrau/klogger": "^1.2",
+        "phpmailer/phpmailer": "^6.0"
+    }
+}

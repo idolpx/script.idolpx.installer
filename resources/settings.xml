@@ -1,0 +1,24 @@
+<settings>
+    <category label="General">
+		<setting id="runonstart" type="bool" label="runonstart" default="false" visible="false"/>
+		<setting id="cleanup" type="text" label="cleanup" default="" visible="false"/>
+
+		<setting id="deviceid" type="text" label="DeviceID"  default=""/>		
+		<setting id="update_kodi" type="bool" label="Check for Kodi updates" default="true"/>
+		<setting type="sep"/>
+		<setting id="keepadv" type="bool" label="Keep my Advanced settings" default="true"/>
+		<setting id="keepgui" type="bool" label="Keep my GUI settings" default="true"/>
+		<setting id="keepfavourites" type="bool" label="Keep my Favourites" default="true"/>
+		<setting id="keepsources" type="bool" label="Keep my Sources" default="true"/>
+		<setting id="keepvideos" type="bool" label="Keep my MyMusic DB" default="true"/>
+		<setting id="keepmusic" type="bool" label="Keep my MyVideos DB" default="true"/>
+		<setting type="sep"/>
+		<setting id="showadult" type="bool" label="Show Adult Content" default="false" visible="false"/>
+	</category>
+	<category label="Advanced">
+		<setting id="update_url" type="text" label="Update URL" default="http://yourdomain.com/kodi/version.php"/>
+		<setting id="update_test" type="bool" label="Select Test Configuration" default="false"/>
+		<setting type="sep"/>
+		<setting id="backup" type="action" label="Backup Current Configuration" action="RunScript(script.idolpx.installer,backup)"/>
+	</category>
+</settings>
