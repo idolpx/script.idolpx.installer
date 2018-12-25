@@ -1,6 +1,8 @@
 # script.idolpx.installer
 Private Kodi build installer/updater<br>
 
+The main functionality is working.  There are some features that still need to be completed.<br>
+
 ## Kodi Addon Setup
 
 1. Edit the "update_url" setting in "resources/settings.xml" to match your domain and that you upload the server scripts to
