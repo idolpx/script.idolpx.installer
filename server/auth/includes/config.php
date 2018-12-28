@@ -9,7 +9,7 @@ if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
     $isWindows = true;
 }
 
-$data = dirname(__FILE__).'\\..\\data\\';
+dirname(__FILE__).'/../data/';
 
 $smtp_host = "smtp.domain.com";
 $smtp_user = "email@address.com";
