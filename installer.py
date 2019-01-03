@@ -19,7 +19,7 @@ def size_format(num):
 #****************************************************************
 def installConfig(url, hash=None):
     path = xbmc.translatePath(os.path.join('special://', 'home'))
-    filename = url.split('/')[-1]
+    filename = url.split(os.sep)[-1]
     destination_file = os.path.join(path, filename)
 
     # Download File
@@ -192,7 +192,7 @@ def createConfig():
 #****************************************************************
 def installAPK(url):
     path = xbmc.translatePath(os.path.join('special://home','addons', 'packages', ''))
-    filename = url.split('/')[-1]
+    filename = url.split(os.sep)[-1]
     destination_file = os.path.join(path, filename)
 
 
@@ -267,7 +267,7 @@ def download_with_resume(url, file_path, callback=None, hash=None, timeout=10):
 
     try:
         block_size = 1000 * 1000 # 1MB
-        filename = url.split('/')[-1]
+        filename = url.split(os.sep)[-1]
         tmp_file_path = file_path + '.part'
         first_byte = os.path.getsize(tmp_file_path) if os.path.exists(tmp_file_path) else 0
         last_byte = first_byte
@@ -351,7 +351,7 @@ def _download_background(filename, bytes_received, bytes_total):
         return percent
 
 def zip(_in, _out, exclusions):
-    zout = _out.split('/')[-1]
+    zout = _out.split(os.sep)[-1]
     zip_file = zipfile.ZipFile(_out, 'w', zipfile.ZIP_DEFLATED)
     try:
         for zin in _in:
@@ -394,7 +394,7 @@ def zip(_in, _out, exclusions):
         zip_file.close()
 
 def unzip(_in, _out):
-    zin = _in.split('/')[-1]
+    zin = _in.split(os.sep)[-1]
     zip_file = zipfile.ZipFile(_in, 'r')
     nFiles = float(len(zip_file.infolist()))
     count = 0
