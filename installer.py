@@ -128,11 +128,11 @@ def installConfig(url, hash=None):
 
 def createConfig():
     source = [xbmc.translatePath(os.path.join('special://home', 'addons'))]
-    source.append(xbmc.translatePath(os.path.join('special://', 'userdata')).rstrip('/'))
+    source.append(xbmc.translatePath(os.path.join('special://', 'userdata')).rstrip(os.sep))
 
     path = xbmc.translatePath(os.path.join('special://','home'))
     version = time.strftime("%Y%m%d_%H%M")
-    destination_file = 'kodi.'+time.strftime("%Y%m%d_%H%M")+'.zip'
+    destination_file = 'kodi.'+version+'.zip'
     
     # Update version.json file
     current = json.loads('{"config_version": "'+version+'","test_version": "'+version+'"}')
@@ -361,7 +361,7 @@ def zip(_in, _out, exclusions):
                 # Include all subfolders, including empty ones.
                 for folder_name in folders:
                     absolute_path = os.path.join(root, folder_name)
-                    relative_path = absolute_path.replace(parent_folder + '/', '')
+                    relative_path = absolute_path.replace(parent_folder + os.sep, '')
                     if not any(e in relative_path for e in exclusions):
                         kodi.log("Adding '%s' to archive." % relative_path)
                         zip_file.write(absolute_path, relative_path)
@@ -369,7 +369,7 @@ def zip(_in, _out, exclusions):
                         kodi.log("Excluding '%s' from the archive." % relative_path)
                 for file_name in files:
                     absolute_path = os.path.join(root, file_name)
-                    relative_path = absolute_path.replace(parent_folder + '/', '')
+                    relative_path = absolute_path.replace(parent_folder + os.sep, '')
                     if not any(e in relative_path for e in exclusions):
                         kodi.log("Adding '%s' to archive." % relative_path)
                         dp.update(100, 'Archiving: '+zout, 
