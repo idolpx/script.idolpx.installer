@@ -9,8 +9,10 @@
 	//$log->info('Returned a million search results'); echo 'ok!'; exit();
 	//sendAlerts(); exit();
 	
-	if($_SESSION['admin']) {
-
+	if(!$_SESSION['authenticated']) {
+		$log->info("[authentication][".$_SERVER['REMOTE_ADDR']."], [".$_GET."]");
+		header('Location: login.php');
+		die();
 	}
 	
 	$devices = array();
