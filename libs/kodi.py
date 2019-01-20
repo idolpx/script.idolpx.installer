@@ -68,7 +68,7 @@ def get_name():
 
 
 def get_mac():
-    mac = get_setting('uuid')
+    mac = get_setting('mac')
     if not mac:
         mac = ':'.join(re.findall('..', '%012x' % uuid.getnode())).upper()
         set_setting('mac', mac)
