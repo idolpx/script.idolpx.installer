@@ -3,6 +3,18 @@ error_reporting(E_ERROR | E_PARSE);
 session_start();
 header("Access-Control-Allow-Origin: *");
 
+// Set your admin password here
+$password = 'password';
+
+// Check Authentication Password
+if (isset($_POST['a'])) {
+	if ($_POST['a'] == $password) {
+		$_SESSION['authenticated'] = true;
+	} else {
+		$_SESSION['authenticated'] = false;
+	}
+}
+
 // Application Variables
 $isWindows = false;
 if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
