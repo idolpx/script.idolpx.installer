@@ -2,6 +2,7 @@
     <category label="General">
 		<setting id="runonstart" type="bool" label="runonstart" default="false" visible="false"/>
 		<setting id="cleanup" type="text" label="cleanup" default="" visible="false"/>
+	    	<setting id="mac" type="text" label="mac" default="" visible="false"/>
 
 		<setting id="deviceid" type="text" label="DeviceID"  default=""/>		
 		<setting id="update_kodi" type="bool" label="Check for Kodi updates" default="true"/>
