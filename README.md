@@ -33,7 +33,6 @@ composer install
 3. Set owner to the user that your web service runs as
 4. Make the "data" and "logs" folders writable by the webserver
 5. Change directory into the "includes" folder and edit the settings in "config.php"
-6. Use basic authentication to restrict access to the "kodi/auth" folder
 
 ## Usage
 
