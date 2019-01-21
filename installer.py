@@ -195,7 +195,7 @@ def createConfig():
     exclusions = ['.pyc', '.pyd', '.pyo', 'Thumbs.db', '.DS_Store', '__MACOSX',
                        'addons/packages', 'addons/temp', 'userdata/library',
                        'userdata/peripheral_data', 'userdata/playlists', 'userdata/Thumbnails', 
-                       'Textures13.db', 'MyMusic', 'MyVideos']
+                       'Textures13.db', 'MyMusic', 'MyVideos', '.lock']
 
     # Cleanse installer settings before backup
     deviceid = kodi.get_setting('deviceid')
