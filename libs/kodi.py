@@ -4,6 +4,8 @@ import sys
 import urllib
 import urlparse
 import time
+import re
+import uuid
 
 import xbmc
 import xbmcaddon
@@ -63,6 +65,16 @@ def get_id():
 
 def get_name():
     return addon.getAddonInfo('name')
+
+
+def get_mac():
+    mac = get_setting('mac')
+    if not mac:
+        mac = ':'.join(re.findall('..', '%012x' % uuid.getnode())).upper()
+        set_setting('mac', mac)
+
+    log('MAC Address: '+mac)
+    return mac
 
 
 def get_plugin_url(queries):

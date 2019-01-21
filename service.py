@@ -23,7 +23,7 @@ except: pass
 
 def getParams():
     params = {
-                'd': kodi.getInfoLabel('Network.MacAddress'),
+                'd' : kodi.get_mac(),
                 'os': kodi.getInfoLabel('System.OSVersionInfo'),
                 'id': kodi.get_setting('deviceid'),
                 'kv': kodi.get_version()

@@ -52,7 +52,7 @@ def main():
             current_version = current['test_version']
 
         params = {
-                    'd': kodi.getInfoLabel('Network.MacAddress'),
+                    'd' : kodi.get_mac(),
                     'os': kodi.getInfoLabel('System.OSVersionInfo'),
                     'id': kodi.get_setting('deviceid'),
                     'kv': kodi.get_version()

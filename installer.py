@@ -166,7 +166,16 @@ def createConfig():
                        'userdata/peripheral_data', 'userdata/playlists', 'userdata/Thumbnails', 
                        'Textures13.db', 'MyMusic', 'MyVideos']
 
-    # Download File
+    # Cleanse installer settings before backup
+    deviceid = kodi.get_setting('deviceid')
+    mac = kodi.get_setting('mac')
+    update_test = kodi.get_setting('update_test')
+
+    kodi.set_setting('deviceid', '')
+    kodi.set_setting('mac', '')
+    kodi.set_setting('update_text', 'false')
+
+    # Backup Files
     dp.create('idolpx Installer', 
               'Creating Backup: '+destination_file, 
               '', 
@@ -187,7 +196,11 @@ def createConfig():
             '',
             '[B]'+destination_file+'[/B]'
         )
-
+        
+    # Restore installer settings after backup
+    kodi.set_setting('deviceid', deviceid)
+    kodi.set_setting('mac', mac)
+    kodi.set_setting('update_text', update_test)
 
 #****************************************************************
 def installAPK(url):
@@ -351,7 +364,7 @@ def _download_background(filename, bytes_received, bytes_total):
         return percent
 
 def zip(_in, _out, exclusions):
-    zout = _out.split('/')[-1]
+    zout = _out.split(os.sep)[-1]
     zip_file = zipfile.ZipFile(_out, 'w', zipfile.ZIP_DEFLATED)
     try:
         for zin in _in:
@@ -394,7 +407,7 @@ def zip(_in, _out, exclusions):
         zip_file.close()
 
 def unzip(_in, _out):
-    zin = _in.split('/')[-1]
+    zin = _in.split(os.sep)[-1]
     zip_file = zipfile.ZipFile(_in, 'r')
     nFiles = float(len(zip_file.infolist()))
     count = 0
