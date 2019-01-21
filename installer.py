@@ -16,6 +16,30 @@ def size_format(num):
         num /= 1024.0
     return "%3.2f%s" % (num, 'PB')
 
+#***************************************************************
+def FIX_SPECIAL(url):
+    USERDATA     =  xbmc.translatePath(os.path.join('special://home/userdata',''))
+    ADDONS       =  xbmc.translatePath(os.path.join('special://home','addons'))
+    dp.create('idolpx Installer',
+              'Converting physical path to special://',
+              '',
+              'Please wait...')
+    for root, dirs, files in os.walk(url):
+        for file in files:
+            if file.endswith(".xml"):
+                try:
+                    a = open((os.path.join(root, file))).read()
+                    b = a.replace(USERDATA, 'special://profile/').replace(ADDONS,'special://home/addons/')
+                    if '/\\' in b:
+                        c = b.split('/\\')
+                        b='/'.join([c[0],c[1].replace('\\','/')])
+                    f = open((os.path.join(root, file)), mode='w')
+                    f.write(str(b))
+                    f.close()
+                except:
+                    pass
+    dp.close()
+
 #****************************************************************
 def installConfig(url, hash=None):
     path = xbmc.translatePath(os.path.join('special://', 'home'))
@@ -127,6 +151,13 @@ def installConfig(url, hash=None):
 
 
 def createConfig():
+    
+    #Fix_Special:
+    USERDATA     =  xbmc.translatePath(os.path.join('special://home/userdata',''))
+    if kodi.get_setting('fix_special') == 'true':
+                    try: FIX_SPECIAL(USERDATA)
+                    except: pass
+    
     source = [xbmc.translatePath(os.path.join('special://home', 'addons'))]
     source.append(xbmc.translatePath(os.path.join('special://', 'userdata')).rstrip(os.sep))
 
