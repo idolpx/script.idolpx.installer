@@ -33,6 +33,10 @@ def FIX_SPECIAL(url):
                     if '/\\' in b:
                         c = b.split('/\\')
                         b='/'.join([c[0],c[1].replace('\\','/')])
+                    if '//' in b[10:]:
+                        b = b.split('://')
+                        b[1] = b[1].replace('//','/')
+                        b = '://'.join([b[0],b[1]])
                     f = open((os.path.join(root, file)), mode='w')
                     f.write(str(b))
                     f.close()
