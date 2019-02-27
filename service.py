@@ -34,7 +34,7 @@ def addon_database():
     db_version = {
 
         '17': 27,# Krypton
-        '18': 28 # Leia
+        '18': 27 # Leia
     }
     return xbmc.translatePath("special://database/Addons%s.db"
                               % db_version.get(KODI, "")).decode('utf-8')
