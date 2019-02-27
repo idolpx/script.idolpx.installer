@@ -208,7 +208,7 @@ def createConfig():
 
     kodi.set_setting('deviceid', '')
     kodi.set_setting('mac', '')
-    kodi.set_setting('update_text', 'false')
+    kodi.set_setting('update_test', 'false')
 
     # Backup Files
     dp.create('idolpx Installer', 
@@ -235,7 +235,7 @@ def createConfig():
     # Restore installer settings after backup
     kodi.set_setting('deviceid', deviceid)
     kodi.set_setting('mac', mac)
-    kodi.set_setting('update_text', update_test)
+    kodi.set_setting('update_test', update_test)
 
 #****************************************************************
 def installAPK(url):
