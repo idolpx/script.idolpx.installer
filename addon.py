@@ -1,13 +1,59 @@
 """idolpx Installer"""
 
 import xbmc, xbmcgui
-import os, sys, json, time
+import os, sys, json, time, shutil
 
 from libs import requests
 from libs import kodi
 import installer
 
-def main():
+
+# Initialize Global Variables
+current = json.loads('{"config_version": "00000000","test_version": "00000000"}')
+current_version = '00000000'
+remote = json.loads('{"config_version": "00000000","test_version": "00000000"}')
+remote_version = '00000000'
+version_file = ''
+url = ''
+hash = ''
+
+
+def getParams():
+    params = {
+                'd' : kodi.get_mac(),
+                'os': kodi.get_info('System.OSVersionInfo'),
+                'id': kodi.get_setting('deviceid'),
+                'kv': kodi.get_version()
+            }
+    return params
+
+
+# Get Current Version
+def getLocalVesion():
+    global current, current_version, version_file
+    
+    path = xbmc.translatePath('special://userdata')
+    version_file = path+'version.json'
+    kodi.debug(version_file)
+    try: 
+        current = json.load(open(version_file))
+
+        # Prompt for Configuration Update
+        if kodi.get_setting('update_test') != 'true':
+            current_version = current['config_version']
+        else:
+            current_version = current['test_version']
+
+    except Exception, e: 
+        kodi.debug('getLocalVersion: '+str(e))
+        
+    kodi.debug('Current Version: '+current_version)
+
+
+# Get Remote Settings
+def getRemoteVersion():
+    global remote, remote_version, url, hash
+    
     dp = xbmcgui.DialogProgress()
     dp.create('idolpx Installer', 
             'Checking for update...', 
@@ -15,16 +61,6 @@ def main():
             'Please wait...')
     dp.update(100)
 
-    # Get Current Version
-    update_file = xbmc.translatePath(os.path.join('special://', 'home'))+'update.zip'
-
-    current = json.loads('{"config_version": "00000000","test_version": "00000000"}')
-    path = xbmc.translatePath(os.path.join('special://', 'userdata'))
-    version_file = path+'version.json'
-    try: current = json.load(open(version_file))
-    except: pass
-
-    # Get Remote Settings
     try:
         # Prompt for Device ID if it is not set
         if not kodi.get_setting('deviceid'):
@@ -45,35 +81,35 @@ def main():
                 kodi.notify('Access denied!', 'Device ID not set.')
                 return
 
-        # Prompt for Configuration Update
-        if kodi.get_setting('update_test') != 'true':
-            current_version = current['config_version']
-        else:
-            current_version = current['test_version']
-
-        params = {
-                    'd' : kodi.get_mac(),
-                    'os': kodi.getInfoLabel('System.OSVersionInfo'),
-                    'id': kodi.get_setting('deviceid'),
-                    'kv': kodi.get_version()
-                }
-
+        params = getParams()
         params['cv'] = current_version
-        kodi.log('Config URL: '+kodi.get_setting('update_url'))
+        kodi.debug('Config URL: '+kodi.get_setting('update_url'))
         response = requests.get(kodi.get_setting('update_url'), params=params)
         remote = json.loads(response.text)
-        kodi.log(json.dumps(remote))
-        dp.close()
+        kodi.debug(json.dumps(remote))
 
         if kodi.get_setting('update_test') != 'true':
             remote_version = remote['config_version']
             url = remote['config_url']
-            hash = remote['config_md5']
         else:
             remote_version = remote['test_version']
             url = remote['test_url']
-            hash = remote['test_md5']
+        
+        response = requests.get(url+'.md5')
+        hash = response.text
+        kodi.debug('MD5 HASH: '+hash)
 
+    except Exception, e: 
+        kodi.debug('getRemoteVersion: '+str(e))
+        
+    dp.close()
+    kodi.debug('Remote Version: '+remote_version)
+
+
+def updateKodi():
+    global remote
+
+    try:
         # Prompt for Kodi Update
         if kodi.get_setting('update_kodi') == 'true':
             if kodi.platform() == 'android' and remote['kodi_version'] != kodi.get_version():
@@ -83,9 +119,21 @@ def main():
                                                 'Would you like to install version [B]'+remote['kodi_version'] +'[/B]?')
                 if choice == 1:
                     installer.installAPK(remote['kodi_url'])
+                    
+    except Exception, e: 
+        kodi.debug('updateKodi: '+str(e))
 
-        kodi.log('Update File: '+update_file)
+
+def updateConfig():
+    global current, current_version, remote, remote_version, version_file, url, hash
+
+    try:
+        updateKodi()
+
+        # Is There an existing update.zip file ready to install?
+        update_file = xbmc.translatePath('special://home/update.zip')
         if os.path.exists(update_file):
+            kodi.debug('Update File: '+update_file)
             url = '/update.zip'
             hash = ''
             choice = xbmcgui.Dialog().yesno('idolpx Installer', 
@@ -113,6 +161,9 @@ def main():
                 with open(version_file, "w") as outfile:
                     json.dump(remote, outfile)
 
+                # Adjust Advanced Settings
+                installer.adjust_advancedSettings()
+
                 choice = xbmcgui.Dialog().yesno('idolpx Installer', 
                                                 'A restart is required. Would you like to restart Kodi now?')
                 if choice == 1:
@@ -123,11 +174,64 @@ def main():
             else:
 
                 xbmcgui.Dialog().ok('idolpx Installer', 
-                                    'Update canelled!')
+                                    'Update canceled!')
                                      
-                
     except Exception, e: 
-        kodi.log(str(e))
+        kodi.debug('updateConfig: '+str(e))
+
+def showAdult():
+    status = window.getProperty('idolpx.installer.adultstatus')
+    if status == 'false':
+        # Enable Adult Addons
+        pin = xbmcgui.Dialog().numeric(0,'Enter PIN')
+        if pin == kodi.get_setting('adultpass'):
+            status = 'true'
+        else:
+            status = 'abort'
+    else:
+        # Disable Adult Addons
+        status = 'false'
+
+    kodi.debug('Adult Addons Enabled: ' + status)
+    if status != 'abort':
+        kodi.set_setting('adultstatus', status)
+        window.setProperty('idolpx.installer.adultstatus', status)
+        
+        addonPath = xbmc.translatePath(os.path.join('special://home', 'addons'))
+        resourcePath = os.path.join(addonPath, kodi.addon_id(), 'resources')
+        nsfw_addons = os.path.join(resourcePath, 'nsfw_addons.dat')
+        with open(nsfw_addons, 'r') as myfile:
+            addons = myfile.read().split('\n')
+
+        for addon in addons:
+            try:
+                query = '{"jsonrpc":"2.0", "method":"Addons.SetAddonEnabled","params":{"addonid":"%s","enabled":%s},"id":1}' % (addon, status)
+                kodi.execute_jsonrpc(query)
+                kodi.debug(query)
+                if status == 'true':
+                    shutil.move(os.path.join(resourcePath, addon), os.path.join(addonPath, addon))
+                else:
+                    shutil.move(os.path.join(addonPath, addon), os.path.join(resourcePath, addon))
+            except:
+                pass
+
+        if status == 'true': 
+            kodi.notify('Adult Addons','Enabled!')
+        else: 
+            kodi.notify('Adult Addons', 'Disabled!')
+
+        kodi.execute('UpdateLocalAddons()')
+        kodi.execute('UpdateAddonRepos()')
+        xbmc.sleep(200)
+    else:
+        kodi.notify('Adult Addons', 'Invalid PIN!')
+
+def optimize():
+    installer.adjust_advancedSettings()
+    choice = xbmcgui.Dialog().yesno('idolpx Installer', 
+                                    'A restart is required. Would you like to restart Kodi now?')
+    if choice == 1:
+        kodi.kill()
 
 
 def backup():
@@ -142,18 +246,29 @@ def backup():
 if __name__ == '__main__':
     window = xbmcgui.Window(10000)
     if window.getProperty('idolpx.installer.running') == 'true':
-        kodi.log('Addon is already running. Exiting...')
+        kodi.debug('Addon is already running. Exiting...')
     else:
         window.setProperty('idolpx.installer.running', 'true')
 
         arg = None
-        try: arg = sys.argv[1].lower()
+        try: 
+            arg = sys.argv[1].lower()
+            kodi.debug(arg)
         except: pass
 
         if arg == 'backup':
             backup()
+        elif arg == 'optimize':
+            optimize()
+        elif arg == 'showadult':
+            showAdult()
+        elif arg == 'updateKodi':
+            getLocalVesion()
+            getRemoteVersion()
+            updateKodi()
         else:
-            main()
+            getLocalVesion()
+            getRemoteVersion()
+            updateConfig()
 
         window.clearProperty('idolpx.installer.running')
-
