@@ -12,6 +12,6 @@
     "test_url": "http://yourdomain.com/kodi/kodi.20181202_2151.zip",
     "test_md5": "ec2d3ab7fe237122c37882258c7d4a7f",
     "kodi_version": "18.5",
-    "kodi_url": "http://mirrors.kodi.tv/releases/android/arm/kodi-18.5-Krypton-armeabi-v7a.apk",
+    "kodi_url": "http://mirrors.kodi.tv/releases/android/arm/kodi-18.5-Leia-armeabi-v7a.apk",
     "kodi_md5": ""
 }
