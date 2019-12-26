@@ -35,6 +35,7 @@ if __name__ == '__main__':
     kodi.update_lastused('plugin.video.mediasnatcher')
     window = xbmcgui.Window(10000)
     window.clearProperty('idolpx.installer.running')
+    window.setProperty('idolpx.installer.adultstatus', kodi.get_setting('adultstatus'))
     installer.do_maintenance()
 
     while not monitor.abortRequested():

@@ -212,32 +212,37 @@ def installConfig(url, hash=None):
                 dp.update(100, 'Restoring Settings',
                         '',
                         'Please wait...')
+
+                # Copy addon settings back into place
+                try: shutil.copyfile(os.path.join(userdata+'.old', 'addon_data', kodi.addon_id(), 'settings.xml'),
+                                     os.path.join(userdata, 'addon_data', kodi.addon_id(), 'settings.xml'))
+                except: pass
+
                 if kodi.get_setting('keepadv') == 'true':
-                    try: shutil.copyfile(userdata+".old/advancedsettings.xml", userdata+"/advancedsettings.xml")
+                    try: shutil.copyfile(os.path.join(userdata+'.old', 'advancedsettings.xml'), os.path.join(userdata, 'advancedsettings.xml'))
                     except: pass
                 if kodi.get_setting('keepfavourites') == 'true':
-                    try: shutil.copyfile(userdata+".old/favourites.xml", userdata+"/favourites.xml")
+                    try: shutil.copyfile(os.path.join(userdata+'.old', 'favourites.xml'), os.path.join(userdata, 'favourites.xml'))
                     except: pass
                 if kodi.get_setting('keepgui') == 'true':
-                    try: shutil.copyfile(userdata+".old/guisettings.xml", userdata+"/guisettings.xml")
+                    try: shutil.copyfile(os.path.join(userdata+'.old', 'guisettings.xml'), os.path.join(userdata, 'guisettings.xml'))
                     except: pass
                 if kodi.get_setting('keepsources') == 'true':
-                    try: shutil.copyfile(userdata+".old/sources.xml", userdata+"/sources.xml")
+                    try: shutil.copyfile(os.path.join(userdata+'.old', 'sources.xml'), os.path.join(userdata, 'sources.xml'))
                     except: pass
                     try:
                         if kodi.get_setting('keepmuisc') == 'true':
-                            for file in glob.glob(userdata+".old/Database/MyMusic*.db"):
-                                shutil.copyfile(file, userdata+"/Database/")
+                            for file in glob.glob(os.path.join(userdata+'.old', 'Database', 'MyMusic*.db')):
+                                shutil.copyfile(file, os.path.join(userdata, 'Database'))
 
                         if kodi.get_setting('keepvideos') == 'true':
-                            for file in glob.glob(userdata+".old/Database/MyVideos*.db"):
-                                shutil.copyfile(file, userdata+"/Database/")
+                            for file in glob.glob(os.path.join(userdata+'.old','Database','MyVideos*.db')):
+                                shutil.copyfile(file, os.path.join(userdata, 'Database'))
                     except: pass
 
-                # Copy addon settings back into place
-                try: shutil.copyfile(userdata+".old/addon_data/"+kodi.addon_id+"/settings.xml",
-                                    userdata+"/addon_data/"+kodi.addon_id+"/settings.xml")
-                except: pass
+                # Enable Adult Addons
+                if kodi.get_setting('adultstatus') == 'true':
+                    kodi.execute('XBMC.RunScript(script.idolpx.installer,showadult)')
 
                 # Delete old 'userdata' folder
                 dp.update(100, "Cleaning up",
@@ -317,7 +322,7 @@ def createConfig():
     except: pass
 
     # Ignore standard addons
-    #std_addons = xbmc.translatePath(os.path.join('special://home', 'addons', kodi.addon_id, 'resources', 'std_addons.dat'))
+    #std_addons = xbmc.translatePath(os.path.join('special://home', 'addons', kodi.addon_id(), 'resources', 'std_addons.dat'))
     #kodi.debug(std_addons)
     #with open(std_addons, 'r') as myfile:
     #    exclusions = myfile.read().split('\n')
@@ -521,7 +526,7 @@ def _download_progress(filename, bytes_received, bytes_total):
 
 def _download_background(filename, bytes_received, bytes_total):
     percent = min((bytes_received * 100) / bytes_total, 100)
-    if kodi.isPlaying() or window.getProperty('idolpx.installer.running') == 'true':
+    if kodi.is_playing() or window.getProperty('idolpx.installer.running') == 'true':
         return -1
     else:
         return percent
