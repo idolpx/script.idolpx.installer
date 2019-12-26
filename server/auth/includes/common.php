@@ -37,7 +37,7 @@ function sendAlerts() {
 		echo "Home: ".isset($alerts['home'])."<br />\n";
 	}
 
-	$message = "(idolpx Installer)\n";
+	$message = '';
 	if(isset($alerts['blocked'])) {
 		$message .= "[Blocked]\n";
 		foreach ($alerts['blocked'] as $key => $value) {
