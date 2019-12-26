@@ -184,7 +184,7 @@ def showAdult():
     if status == 'false':
         # Enable Adult Addons
         pin = xbmcgui.Dialog().numeric(0,'Enter PIN')
-        if pin == kodi.get_setting('adultpass'):
+        if pin == kodi.get_setting('adultpin'):
             status = 'true'
         else:
             status = 'abort'
