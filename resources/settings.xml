@@ -16,8 +16,8 @@
 		<setting type="sep"/>
 		<setting id="adultpin" type="text" label="adultpin" default="1397" visible="false"/>
 		<setting id="adultstatus" type="bool" label="adultstatus" default="false" visible="false"/>
-		<setting id="adultshow" type="action" label="Show Adult Content" visible="eq(-1,false)" action="RunScript(script.idolpx.installer,showadult)"/>
-		<setting id="adulthide" type="action" label="Hide Adult Content" visible="eq(-2,true)" action="RunScript(script.idolpx.installer,showadult)"/>
+		<setting id="adultshow" type="action" label="Show Adult Addons" visible="eq(-1,false)" action="RunScript(script.idolpx.installer,showadult)"/>
+		<setting id="adulthide" type="action" label="Hide Adult Addons" visible="eq(-2,true)" action="RunScript(script.idolpx.installer,showadult)"/>
 	</category>
 	<category label="Maintenance">
 		<setting id="optimize" type="action" label="Optimize Kodi Advanced Settings" action="RunScript(script.idolpx.installer,optimize)"/>	
