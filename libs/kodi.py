@@ -1,70 +1,51 @@
-import json
-import os
-import sys
-import urllib
-import urlparse
-import time
-import re
-import uuid
+import xbmc, xbmcaddon, xbmcgui, xbmcplugin
+import os, sys, json, urllib, urlparse
+import time, re, uuid, sqlite3
 
-import xbmc
-import xbmcaddon
-import xbmcgui
-import xbmcplugin
+from datetime import datetime
 
 addon = xbmcaddon.Addon()
 
-ICON_PATH = os.path.join(addon.getAddonInfo('path'), 'resources/icon.png')
-
-get_setting = addon.getSetting
-
-show_settings = addon.openSettings
-
-addon_id = addon.getAddonInfo('id')
-
-ADDON = xbmcaddon.Addon(id=addon_id)
-
 execute = xbmc.executebuiltin
+get_setting = addon.getSetting
+show_settings = addon.openSettings
+is_playing = xbmc.Player().isPlaying
+#dialog = xbmcgui.Dialog()
+#progressDialog = xbmcgui.DialogProgress()
+#windowDialog = xbmcgui.WindowDialog()
 
-isPlaying = xbmc.Player().isPlaying
+kodi_version = xbmc.getInfoLabel('System.BuildVersion')[:2]
+artwork = xbmc.translatePath('special://home/addons/' + addon.getAddonInfo('id') + '/resources/')
 
-addonInfo = xbmcaddon.Addon().getAddonInfo
+def addon_version():
+    return addon.getAddonInfo('version')
 
-dialog = xbmcgui.Dialog()
+def addon_id():
+    return addon.getAddonInfo('id')
 
-progressDialog = xbmcgui.DialogProgress()
+def addon_name():
+    return addon.getAddonInfo('name')
 
-windowDialog = xbmcgui.WindowDialog()
+def addon_info(data):
+    return addon.getAddonIfno(data)
 
-artwork = xbmc.translatePath(os.path.join('special://home', 'addons', addon_id, 'art/'))
-
-fanart = artwork + 'fanart.jpg'
-
-
-def get_path():
+def addon_path():
     return addon.getAddonInfo('path')
 
-
-def get_profile():
+def addon_profile():
     return addon.getAddonInfo('profile')
+
+def addon_icon():
+    return artwork + 'icon.png'
+
+def addon_fanart():
+    return artwork + 'fanart.jpg'
 
 
 def set_setting(id, value):
     # print "SETTING IS =" +value
     if not isinstance(value, basestring): value = str(value)
     addon.setSetting(id, value)
-
-
-def get_version():
-    return addon.getAddonInfo('version')
-
-
-def get_id():
-    return addon.getAddonInfo('id')
-
-
-def get_name():
-    return addon.getAddonInfo('name')
 
 
 def get_mac():
@@ -96,7 +77,7 @@ def LogNotify(title, message, times, icon):
     xbmc.executebuiltin("XBMC.Notification(" + title + "," + message + "," + times + "," + icon + ")")
 
 
-def addDir(name, url, mode, thumb, cover=None, fanart=fanart, meta_data=None, is_folder=None,
+def addDir(name, url, mode, thumb, cover=None, fanart=addon_fanart(), meta_data=None, is_folder=None,
            is_playable=None,
            menu_items=None, replace_menu=False, description=None):
     u = sys.argv[0] + "?url=" + urllib.quote_plus(url) + "&mode=" + str(
@@ -114,8 +95,7 @@ def addDir(name, url, mode, thumb, cover=None, fanart=fanart, meta_data=None, is
     else:
         thumb = meta_data['cover_url']
         fanart = meta_data['backdrop_url']
-    if ADDON.getSetting('debug') == "true":
-        print u
+    debug(u)
     if menu_items is None: menu_items = []
 
     if is_folder is None:
@@ -140,7 +120,7 @@ def addDir(name, url, mode, thumb, cover=None, fanart=fanart, meta_data=None, is
 
 ##NON CLICKABLE####
 
-def addItem(name, url, mode, iconimage, fanart=fanart, description=None):
+def addItem(name, url, mode, iconimage, fanart=addon_fanart(), description=None):
     u = sys.argv[0] + "?url=" + urllib.quote_plus(url) + "&mode=" + str(mode) + "&name=" + urllib.quote_plus(
         name) + "&fanart=" + urllib.quote_plus(fanart)
     ok = True
@@ -190,18 +170,18 @@ def parse_query(query):
 
 
 def notify(header=None, msg='', duration=2000, sound=None):
-    if header is None: header = get_name()
+    if header is None: header = addon_name()
     if sound is None:
         sound = get_setting('mute_notifications')
         if sound == 'true':
             sound = False
         else:
             sound = True
-    xbmcgui.Dialog().notification(header, msg, ICON_PATH, duration, sound)
+    xbmcgui.Dialog().notification(header, msg, addon_icon(), duration, sound)
 
 
 def dl_notify(header=None, msg='', icon=None, duration=2000, sound=None):
-    if header is None: header = get_name()
+    if header is None: header = addon_name()
     if sound is None:
         sound = get_setting('mute_notifications')
         if sound == 'true':
@@ -233,22 +213,22 @@ def message(text1, text2="", text3=""):
         xbmcgui.Dialog().ok(text1, text2, text3)
 
 
-def infoDialog(message, heading=addonInfo('name'), icon=addonIcon(), time=3000):
+def infoDialog(message, heading=addon_name(), icon=addon_icon(), time=3000):
     try:
         dialog.notification(heading, message, icon, time, sound=False)
     except:
         execute("Notification(%s,%s, %s, %s)" % (heading, message, time, icon))
 
 
-def yesnoDialog(line1, line2, line3, heading=addonInfo('name'), nolabel='', yeslabel=''):
+def yesnoDialog(line1, line2, line3, heading=addon_name(), nolabel='', yeslabel=''):
     return dialog.yesno(heading, line1, line2, line3, nolabel, yeslabel)
 
 
-def okDialog(line1, line2, line3, heading=addonInfo('name')):
+def okDialog(line1, line2, line3, heading=addon_name()):
     return dialog.ok(heading, line1, line2, line3)
 
 
-def selectDialog(list, heading=addonInfo('name')):
+def selectDialog(list, heading=addon_name()):
     return dialog.select(heading, list)
 
 
@@ -306,12 +286,17 @@ def auto_view(content):
 
 
 def log(msg, level=xbmc.LOGNOTICE):
-    name = 'IDOLPX NOTICE'
-    # override message level to force logging when addon logging turned on
-    level = xbmc.LOGNOTICE
-
     try:
-        xbmc.log('%s: %s' % (name, msg), level)
+        xbmc.log('[%s] %s' % (addon_name(), msg), level)
+    except:
+        try:
+            xbmc.log('Logging Failure', level)
+        except:
+            pass  # just give up
+
+def info(msg, level=xbmc.LOGNOTICE):
+    try:
+        xbmc.log('[%s] %s' % (addon_name(), msg), level)
     except:
         try:
             xbmc.log('Logging Failure', level)
@@ -319,40 +304,25 @@ def log(msg, level=xbmc.LOGNOTICE):
             pass  # just give up
 
 
-def logInfo(msg, level=xbmc.LOGNOTICE):
-    name = 'IDOLPX INFORMATION'
-    # override message level to force logging when addon logging turned on
-    level = xbmc.LOGNOTICE
-
-    try:
-        xbmc.log('%s: %s' % (name, msg), level)
-    except:
+def debug(msg, level=xbmc.LOGNOTICE):
+    if get_setting('debug') == "true":
         try:
-            xbmc.log('Logging Failure', level)
+            xbmc.log('[%s] %s' % (addon_name(), msg), level)
         except:
-            pass  # just give up
+            try:
+                xbmc.log('Logging Failure', level)
+            except:
+                pass  # just give up
 
 
 def get_version():
     version_info = xbmc.getInfoLabel('System.BuildVersion').split(" ")
     return  version_info[0]
 
-def getInfoLabel(infoLabel):
-    busystring = 'Busy'
-    value = xbmc.getInfoLabel(infoLabel)
-    i = 1
-    log(str(i)+': '+value)
-    while value == busystring or value == "00:00:00:00:00:00":
-        i = i+1
-        value = xbmc.getInfoLabel(infoLabel) 
-        time.sleep(1)
-        if i == 10:
-            break
 
-    if value == busystring or value == "00:00:00:00:00:00":
-        return ''
-    else:
-        return value
+def get_info(label):
+    return xbmc.getInfoLabel(label)
+
 
 def translate_path(path):
     return xbmc.translatePath(path).decode('utf-8')
@@ -363,6 +333,23 @@ def execute_jsonrpc(command):
         command = json.dumps(command)
     response = xbmc.executeJSONRPC(command)
     return json.loads(response)
+
+
+def addon_database():
+    db_version = {
+
+        '17': 27,# Krypton
+        '18': 27 # Leia
+    }
+    return xbmc.translatePath("special://database/Addons%s.db"
+                              % db_version.get(kodi_version, "")).decode('utf-8')
+
+def update_lastused(addon_id):
+    conn = sqlite3.connect(addon_database(), isolation_level=None, timeout=120)
+    cursor = conn.cursor()
+    cursor.execute("UPDATE installed SET lastUsed = '"+ datetime.now().strftime('%Y-%m-%d %H:%M:%S') +"' WHERE addonId = '%s'" % addon_id)
+    cursor.close()
+    conn.close()
 
 def kill():
     myplatform = platform()
