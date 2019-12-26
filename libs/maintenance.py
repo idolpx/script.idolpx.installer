@@ -138,6 +138,7 @@ def deleteThumbnails(mode='verbose'):
 def purgePackages(mode='verbose'):
 
     purgePath = xbmc.translatePath('special://home/addons/packages')
+    kodi.debug('purgePath: %s' % purgePath)
     dialog = xbmcgui.Dialog()
     for root, dirs, files in os.walk(purgePath):
         file_count = 0
@@ -175,7 +176,7 @@ def purgeHome(mode='verbose'):
         break
                 
     if mode == 'verbose':
-        kodi.notify('Maintenance' , 'Clean Packages Completed') 
+        kodi.notify('Maintenance' , 'Clean Home Completed') 
 
 
 
