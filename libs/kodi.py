@@ -282,7 +282,7 @@ def auto_view(content):
     else:
         content = 'movies'
     xbmcplugin.setContent(int(sys.argv[1]), content)
-    xbmc.executebuiltin("Container.SetViewMode(%s)" % get_setting('default-view'))
+    execute("Container.SetViewMode(%s)" % get_setting('default-view'))
 
 
 def log(msg, level=xbmc.LOGNOTICE):
@@ -348,6 +348,13 @@ def update_lastused(addon_id):
     conn = sqlite3.connect(addon_database(), isolation_level=None, timeout=120)
     cursor = conn.cursor()
     cursor.execute("UPDATE installed SET lastUsed = '"+ datetime.now().strftime('%Y-%m-%d %H:%M:%S') +"' WHERE addonId = '%s'" % addon_id)
+    cursor.close()
+    conn.close()
+
+def update_enabled(addon_id, status):
+    conn = sqlite3.connect(addon_database(), isolation_level=None, timeout=120)
+    cursor = conn.cursor()
+    cursor.execute("UPDATE installed SET enabled = %s WHERE addonId = '%s'" % (status, addon_id))
     cursor.close()
     conn.close()
 
