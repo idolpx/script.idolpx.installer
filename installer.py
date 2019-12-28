@@ -1,7 +1,7 @@
 # kodi.idolpx.com
 
 import xbmc, xbmcplugin, xbmcgui, xbmcaddon
-import sys, os, time, shutil, hashlib, glob, json, re
+import sys, os, time, shutil, hashlib, glob, json, re, subprocess
 
 from libs import requests
 from libs import kodi
@@ -242,7 +242,10 @@ def installConfig(url, hash=None):
 
                 # Enable Adult Addons
                 if kodi.get_setting('adultstatus') == 'true':
-                    kodi.execute('XBMC.RunScript(script.idolpx.installer,showadult)')
+                    kodi.debug('Adult Addons Enabled')
+                    kodi.execute('XBMC.RunScript(%s,%s,%s,%s)' % (kodi.addon_id(), 'showadult', 'true', kodi.get_setting('adultpin')))
+                else:
+                    kodi.debug('Adult Addons Disabled')
 
                 # Delete old 'userdata' folder
                 dp.update(100, "Cleaning up",
@@ -372,7 +375,7 @@ def createConfig():
 
 #****************************************************************
 def installAPK(url):
-    path = xbmc.translatePath('special://home/addons/packages')
+    path = '/storage/emulated/0/Download' #xbmc.translatePath('special://home/addons/packages')
     filename = url.split('/')[-1]
     destination_file = os.path.join(path, filename)
 
@@ -394,7 +397,14 @@ def installAPK(url):
             kodi.debug('Installing APK:'+destination_file)
             kodi.get_setting('runonstart', 'true')
             kodi.set_setting('cleanup', destination_file)
-            kodi.execute('StartAndroidActivity("","android.intent.action.VIEW","application/vnd.android.package-archive","file:'+destination_file+'")')
+            #kodi.execute('StartAndroidActivity("","android.intent.action.VIEW","application/vnd.android.package-archive","file:'+destination_file+'")')
+            #kodi.execute('StartAndroidActivity("","android.intent.action.INSTALL_PACKAGE ","application/vnd.android.package-archive","content://%s")' % destination_file)
+            #FMANAGER  = {0:'com.android.documentsui',1:CUSTOM}[int(REAL_SETTINGS.getSetting('File_Manager'))]
+            #xbmc.executebuiltin('StartAndroidActivity(%s,,,"content://%s")'%(FMANAGER,apkfile))
+
+            command = 'pm install -rgd ' + destination_file
+            launch_command(command)
+
             return True
             break
         else:
@@ -405,6 +415,18 @@ def installAPK(url):
             if choice == 0:
                 return False
                 break
+
+def launch_command(command_launch):
+    try:
+        kodi.debug('[%s] %s' % ('LAUNCHING SUBPROCESS:', command_launch), 2)
+        external_command = subprocess.call(command_launch, shell = True, executable = '/system/bin/sh')
+    except Exception, e:
+        try:
+            kodi.debug('[%s] %s' % ('ERROR LAUNCHING COMMAND !!!', e.message, external_command), 2)
+            kodi.debug('[%s] %s' % ('LAUNCHING OS:', command_launch), 2)
+            external_command = os.system(command_launch)
+        except:
+            kodi.debug('[%s]' % ('ERROR LAUNCHING COMMAND !!!', external_command), 2)
 
 
 #****************************************************************

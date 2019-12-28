@@ -7,8 +7,8 @@ from libs import requests
 from libs import kodi
 import installer
 
-
 # Initialize Global Variables
+window = xbmcgui.Window(10000)
 current = json.loads('{"config_version": "00000000","test_version": "00000000"}')
 current_version = '00000000'
 remote = json.loads('{"config_version": "00000000","test_version": "00000000"}')
@@ -29,7 +29,7 @@ def getParams():
 
 
 # Get Current Version
-def getLocalVesion():
+def getLocalVersion():
     global current, current_version, version_file
     
     path = xbmc.translatePath('special://userdata')
@@ -179,11 +179,17 @@ def updateConfig():
     except Exception, e: 
         kodi.debug('updateConfig: '+str(e))
 
-def showAdult():
-    status = window.getProperty('idolpx.installer.adultstatus')
-    if status == 'false':
+def showAdult(status, pin='0'):
+    global window
+
+    if status == None:
+        status = window.getProperty('idolpx.installer.adultstatus')
+
+    if status == 'true':
         # Enable Adult Addons
-        pin = xbmcgui.Dialog().numeric(0,'Enter PIN')
+        if pin == '0':
+            pin = xbmcgui.Dialog().numeric(0,'Enter PIN')
+
         if pin == kodi.get_setting('adultpin'):
             status = 'true'
         else:
@@ -194,7 +200,6 @@ def showAdult():
 
     kodi.debug('Adult Addons Enabled: ' + status)
     if status != 'abort':
-        kodi.set_setting('adultstatus', status)
         window.setProperty('idolpx.installer.adultstatus', status)
         
         addonPath = xbmc.translatePath(os.path.join('special://home', 'addons'))
@@ -205,24 +210,35 @@ def showAdult():
 
         for addon in addons:
             try:
-                query = '{"jsonrpc":"2.0", "method":"Addons.SetAddonEnabled","params":{"addonid":"%s","enabled":%s},"id":1}' % (addon, status)
-                kodi.execute_jsonrpc(query)
-                kodi.debug(query)
+                # Move Addon
                 if status == 'true':
                     shutil.move(os.path.join(resourcePath, addon), os.path.join(addonPath, addon))
+                    #kodi.update_enabled(addon, 1)
                 else:
                     shutil.move(os.path.join(addonPath, addon), os.path.join(resourcePath, addon))
+                    #kodi.update_enabled(addon, 0)
+
+                # Enable/Disable Addon
+                query = '{"jsonrpc":"2.0", "id":1, "method":"Addons.SetAddonEnabled","params":{"addonid":"%s", "enabled":%s}}' % (addon, status)
+                kodi.execute_jsonrpc(query)
+                kodi.debug(query)
+                xbmc.sleep(200)
+
             except:
                 pass
 
+        kodi.execute('UpdateLocalAddons()')
+        kodi.execute('UpdateAddonRepos()')
+        #xbmc.sleep(1000)
+        #kodi.execute('ReloadSkin()')
+        
+        kodi.set_setting('adultstatus', status)         
+        
         if status == 'true': 
             kodi.notify('Adult Addons','Enabled!')
         else: 
             kodi.notify('Adult Addons', 'Disabled!')
-
-        kodi.execute('UpdateLocalAddons()')
-        kodi.execute('UpdateAddonRepos()')
-        xbmc.sleep(200)
+       
     else:
         kodi.notify('Adult Addons', 'Invalid PIN!')
 
@@ -244,11 +260,7 @@ def backup():
 
 
 if __name__ == '__main__':
-    window = xbmcgui.Window(10000)
-    if window.getProperty('idolpx.installer.running') == 'true':
-        kodi.debug('Addon is already running. Exiting...')
-    else:
-        window.setProperty('idolpx.installer.running', 'true')
+        kodi.debug(sys.argv)
 
         arg = None
         try: 
@@ -258,17 +270,27 @@ if __name__ == '__main__':
 
         if arg == 'backup':
             backup()
+
         elif arg == 'optimize':
             optimize()
+
         elif arg == 'showadult':
-            showAdult()
+            showAdult(sys.argv[2].lower(), sys.argv[3].lower())
+
         elif arg == 'updateKodi':
-            getLocalVesion()
+            getLocalVersion()
             getRemoteVersion()
             updateKodi()
-        else:
-            getLocalVesion()
-            getRemoteVersion()
-            updateConfig()
 
-        window.clearProperty('idolpx.installer.running')
+        else:
+            
+            if window.getProperty('idolpx.installer.running') == 'true':
+                kodi.debug('Addon is already running. Exiting...')
+            else:
+                window.setProperty('idolpx.installer.running', 'true')
+
+                getLocalVersion()
+                getRemoteVersion()
+                updateConfig()
+
+            window.clearProperty('idolpx.installer.running')

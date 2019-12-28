@@ -43,7 +43,7 @@ if __name__ == '__main__':
         # Start idolpx Installer if runonstart is set
         if kodi.get_setting('runonstart') == 'true':
             kodi.get_setting('runonstart', 'false')
-            kodi.execute('XBMC.RunScript('+addon_id+')', True)
+            kodi.execute('XBMC.RunScript(%s)' % addon_id, True)
 
         # Clean up Kodi apk after install
         cleanup = kodi.get_setting('cleanup')
@@ -86,7 +86,7 @@ if __name__ == '__main__':
                 if kodi.get_setting('update_kodi') == 'true':
                     if kodi.platform() == 'android' and remote['kodi_version'] != kodi.get_version():
                         # Start idolpx Installer
-                        kodi.execute('XBMC.RunScript('+addon_id+',updateKodi)', True)
+                        kodi.execute('XBMC.RunScript(%s, %s)' % (addon_id, 'updateKodi'), True)
 
                 if kodi.get_setting('update_test') != 'true':
                     remote_version = remote['config_version']
@@ -109,7 +109,7 @@ if __name__ == '__main__':
                     #if installer.download_with_resume(url, destination_file, installer._download_background):
 
                     # Start idolpx Installer
-                    kodi.execute('XBMC.RunScript('+addon_id+')', True)
+                    kodi.execute('XBMC.RunScript(%s)' % addon_id, True)
                 else:
                     kodi.debug("No configuration update is available.")
 
