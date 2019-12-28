@@ -1,8 +1,11 @@
 repository.xbmcadult
 repository.jizzplanet
 repository.kodiadult
+plugin.video.adultflix
 plugin.video.empflix
 plugin.video.jizzplanet
 plugin.video.uwc
 plugin.video.videodevil
 script.module.resolveurl.xxx
+script.adultflix.artwork
+script.adultflix.scrapers
